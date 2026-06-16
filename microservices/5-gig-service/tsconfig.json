@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    // "declaration": true,
+    // "emitDeclarationOnly": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    // "lib": ["dom", "ES2015"],
+    "module": "commonjs",
+    // "moduleResolution": "bundler",
+    "types": ["node", "jest"],    // ADD THIS LINE
+    "noEmitOnError": true,
+    // "outDir": "build",
+    // "rootDir": "./src",
+    "rootDir": ".",
+    "outDir": "build",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2021",
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "pretty": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "plugins": [
+      {"transform":"typescript-transform-paths"},
+      {"transform":"typescript-transform-paths", "afterDeclarations":true },
+    ],
+    "paths": {
+      "@gig/*":["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

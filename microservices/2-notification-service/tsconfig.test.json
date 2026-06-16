@@ -1,0 +1,16 @@
+// tsconfig.test.json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmitOnError": false,
+    "declaration": false,
+    "emitDeclarationOnly": false,
+    "outDir": "./build",
+    "rootDir": "./src",
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "build", "coverage"]
+}

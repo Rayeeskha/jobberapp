@@ -1,0 +1,43 @@
+FROM node:22-alpine AS builder
+
+ARG NPM_TOKEN
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY tsconfig.json ./
+
+RUN echo "@rayeeskha:registry=https://npm.pkg.github.com/" > .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" >> .npmrc
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+# =========================
+# Production Stage
+# =========================
+FROM node:22-alpine
+
+ARG NPM_TOKEN
+
+WORKDIR /app
+
+RUN apk add --no-cache curl
+
+COPY package*.json ./
+
+RUN echo "@rayeeskha:registry=https://npm.pkg.github.com/" > .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" >> .npmrc
+
+RUN npm install -g pm2
+
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/build ./build
+
+EXPOSE 4007
+
+CMD ["npm", "run", "start"]
