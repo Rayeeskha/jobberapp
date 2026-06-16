@@ -15,4 +15,4 @@ This repo contains all codes for the ECommerce freelance marketplace application
 * [Volumes README file](https://github.com/rayeeskha/jobberapp/blob/main/volumes/README.md)
 
 ### Project Architecture
-![Architecture Diagram](./assets/project_arch.png)
+![Architecture Diagram](./assets/requirement-diagram.png)
