@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobber-elastic
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobber-elastic
+
+  strategy:
+    type: Recreate
+
+  minReadySeconds: 10
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+
+  template:
+    metadata:
+      labels:
+        app: jobber-elastic
+
+    spec:
+      initContainers:
+        - name: busybox
+          image: busybox
+          imagePullPolicy: Always
+          command:
+            [
+              "sh",
+              "-c",
+              "chown -R 1000:1000 /usr/share/elasticsearch/data",
+            ]
+
+          volumeMounts:
+            - name: elasticsearch-local-storage
+              mountPath: /usr/share/elasticsearch/data
+
+      containers:
+        - name: jobber-elastic
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+          imagePullPolicy: Always
+
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+            requests:
+              cpu: 200m
+              memory: 1Gi
+
+          env:
+            - name: discovery.type
+              value: single-node
+
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+
+            - name: bootstrap.memory_lock
+              value: "true"
+
+            - name: xpack.security.enabled
+              value: "true"
+
+            - name: xpack.security.http.ssl.enabled
+              value: "false"
+
+            - name: xpack.security.transport.ssl.enabled
+              value: "false"
+
+            - name: xpack.security.authc.api_key.enabled
+              value: "true"
+
+            - name: xpack.monitoring.collection.enabled
+              value: "true"
+
+            - name: xpack.security.enrollment.enabled
+              value: "true"
+
+            - name: xpack.security.authc.token.enabled
+              value: "true"
+
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jobber-backend-secret
+                  key: jobber-elasticsearch-password
+
+          ports:
+            - name: jobber-elastic
+              containerPort: 9200
+
+          volumeMounts:
+            - name: elasticsearch-local-storage
+              mountPath: /usr/share/elasticsearch/data
+
+      volumes:
+        - name: elasticsearch-local-storage
+          persistentVolumeClaim:
+            claimName: elasticsearch-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: elasticsearch-pv
+
+spec:
+  storageClassName: elasticsearch-local-storage
+
+  capacity:
+    storage: 6Gi
+
+  accessModes:
+    - ReadWriteOnce
+
+  persistentVolumeReclaimPolicy: Retain
+
+  hostPath:
+    path: /mnt/data/elasticsearch
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-pvc
+  namespace: production
+
+spec:
+  storageClassName: elasticsearch-local-storage
+
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      storage: 5Gi
