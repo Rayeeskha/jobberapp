@@ -159,4 +159,4 @@ Important: Start gateway service last.
 ---
 ---
 
-![Architecture Diagram](./assets/requirement-diagram.png)
+![Architecture Diagram](../assets/requirement-diagram.png)
