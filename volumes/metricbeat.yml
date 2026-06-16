@@ -1,0 +1,53 @@
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+metricbeat.modules:
+
+  - module: docker
+    enabled: true
+    period: 10s
+
+    hosts:
+      - "tcp://host.docker.internal:2375"
+
+    metricsets:
+      - container
+      - cpu
+      - diskio
+      - healthcheck
+      - info
+      - memory
+      - network
+
+  - module: system
+    enabled: true
+    period: 10s
+
+    metricsets:
+      - cpu
+      - load
+      - memory
+      - network
+      - process
+      - process_summary
+      - uptime
+      - filesystem
+      - fsstat
+
+    processes: ['.*']
+    hostfs: "/hostfs"
+
+processors:
+  - add_host_metadata: ~
+
+output.elasticsearch:
+  hosts:
+    - "http://elasticsearch_container:9200"
+  username: 'elastic'
+  password: 'admin1234'
+
+setup.kibana:
+  host: "kibana_container:5601"
+
+logging.level: info
