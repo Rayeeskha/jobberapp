@@ -9,7 +9,6 @@ pipeline {
     agent {
         label 'Jenkins-Agent'
     }
-
     tools {
         nodejs "NodeJS"
         dockerTool "Docker"
@@ -142,31 +141,31 @@ pipeline {
             }
         }
 
-        // stage("Create New Pods") {
-        //     steps {
-        //         withKubeCredentials(
-        //             kubectlCredentials: [[
-        //                 caCertificate: '',
-        //                 clusterName: 'docker-desktop',
-        //                 contextName: 'docker-desktop',
-        //                 credentialsId: 'jenkins-k8s-token',
-        //                 namespace: '',
-        //                 serverUrl: 'https://kubernetes.docker.internal:6443'
-        //             ]]
-        //         ) {
-        //             script {
-        //                 def pods = groovyMethods.findPodsFromName(namespace, serviceName)
+        stage("Create New Pods") {
+            steps {
+                withKubeCredentials(
+                    kubectlCredentials: [[
+                        caCertificate: '',
+                        clusterName: 'jobberapp.ap-south-1.eksctl.io', // local :- docker-desktop
+                        contextName: 'jobber@jobberapp.ap-south-1.eksctl.io',  // local :- docker-desktop
+                        credentialsId: 'jenkins-k8s-token',
+                        namespace: '',
+                        serverUrl: 'https://E0BF2E5E5EC81438D7731C4B2AAE3E0F.gr7.ap-south-1.eks.amazonaws.com' // https://kubernetes.docker.internal:6443
+                    ]]
+                ) {
+                    script {
+                        def pods = groovyMethods.findPodsFromName(namespace, serviceName)
 
-        //                 for (podName in pods) {
-        //                     sh """
-        //                         kubectl delete -n ${namespace} pod ${podName}
-        //                         sleep 10
-        //                     """
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                        for (podName in pods) {
+                            sh """
+                                kubectl delete -n ${namespace} pod ${podName}
+                                sleep 10
+                            """
+                        }
+                    }
+                }
+            }
+        }
     }
 
     post {
